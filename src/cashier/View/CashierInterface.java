@@ -5,19 +5,31 @@
  */
 package cashier.View;
 
-import cashier.controller.SocketServer;
+import cashier.controller.ServerClass;
 import cashier.model.Order;
-import java.util.ArrayList;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
+import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
-
-
 /**
  *
  * @author Ramen
  */
 public class CashierInterface extends javax.swing.JFrame {
-    public SocketServer server;
-    
+
+	static ServerClass ss;
+	static Socket s;
+	static DataInputStream din;
+	static DataOutputStream dout;
+	static ObjectOutputStream objOut;
+	static ObjectInputStream objIn;
+	Order order;
+	
     /**
      * Creates new form NewJFrame
      */
@@ -32,6 +44,7 @@ public class CashierInterface extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    
     private void initComponents() {
 
         TableDropBox = new javax.swing.JComboBox<>();
@@ -40,14 +53,14 @@ public class CashierInterface extends javax.swing.JFrame {
         TotalTable = new javax.swing.JTable();
         jTextField1 = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        StartServerButton = new javax.swing.JToggleButton();
+        StartServerButton = new JButton();
         jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
         CalculateTotalButton = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        updateArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -55,31 +68,20 @@ public class CashierInterface extends javax.swing.JFrame {
 
         jLabel1.setText("CASHIER VIEW");
 
-        TotalTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Dish", "Price", "Quantity", "Amount"
-            }
+        TotalTable.setModel(new DefaultTableModel(
+        	new Object[][] {
+        		{null, null, null, null},
+        	},
+        	new String[] {
+        		"Dish", "Price", "Quantity", "Amount"
+        	}
         ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class
-            };
-            boolean[] canEdit = new boolean [] {
-                true, false, false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
+        	Class[] columnTypes = new Class[] {
+        		String.class, Double.class, Integer.class, Double.class
+        	};
+        	public Class getColumnClass(int columnIndex) {
+        		return columnTypes[columnIndex];
+        	}
         });
         jScrollPane1.setViewportView(TotalTable);
 
@@ -92,11 +94,6 @@ public class CashierInterface extends javax.swing.JFrame {
         jLabel2.setText("Cash Recieved: ");
 
         StartServerButton.setText("Start Server");
-        StartServerButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                StartServerButtonActionPerformed(evt);
-            }
-        });
 
         jButton1.setText("Recieve");
 
@@ -108,9 +105,9 @@ public class CashierInterface extends javax.swing.JFrame {
 
         CalculateTotalButton.setText("Calculate Total");
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane2.setViewportView(jTextArea1);
+        updateArea.setColumns(20);
+        updateArea.setRows(5);
+        jScrollPane2.setViewportView(updateArea);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -190,24 +187,38 @@ public class CashierInterface extends javax.swing.JFrame {
 
     private void StartServerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StartServerButtonActionPerformed
         // TODO add your handling code here:
+        try{
+        	ss = new ServerClass();
+//        	s = ss.accept();
+        	
+        }catch(Exception e){
+        	
+        }
         
-        server = new SocketServer();
         StartServerButton.setEnabled(false);
+    	try{
+
+        	String msgout = "SomeText";
+//        	msgout = updateArea.getText();
+        	dout.writeUTF(msgout);
+        	
+    	}
+    	catch(Exception e) {
+    		
+    	}
         
     }//GEN-LAST:event_StartServerButtonActionPerformed
-    
-    public void RetryStart(int port){
-        if(server != null){ server.stop(); }
-        server = new SocketServer(this, port);
-    }
-    
+    	
     public void addToOrderList( Order ord){
         //// Implement a list.. and after choice of drop box, inflate the table
+    	//TODO Still have to handle the table number and show only selected table number.
+    	 DefaultTableModel model = (DefaultTableModel) TotalTable.getModel();
+         model.addRow(new Object[]{ord.getDishName(),ord.getUnitPrice(),ord.getQuantity(),(ord.getUnitPrice()*ord.getQuantity())});
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton CalculateTotalButton;
-    private javax.swing.JToggleButton StartServerButton;
+    private JButton StartServerButton;
     private javax.swing.JComboBox<String> TableDropBox;
     private javax.swing.JTable TotalTable;
     private javax.swing.JButton jButton1;
@@ -218,7 +229,7 @@ public class CashierInterface extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    public javax.swing.JTextArea jTextArea1;
+    static public javax.swing.JTextArea updateArea;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 
@@ -229,7 +240,9 @@ public class CashierInterface extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
+    	
+    	
+    	/* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
@@ -252,7 +265,26 @@ public class CashierInterface extends javax.swing.JFrame {
         }
         //</editor-fold>
         //</editor-fold>
-        /* Create and display the form */ 
+        /* Create and display the form */
+        
+        
+   /*     String msg= "";
+        try{
+   		 	ss = new ServerClass(this,13000);	
+//   		 	s=ss.accept();
+   		 	din = new DataInputStream(s.getInputStream());
+   		 	dout = new DataOutputStream(s.getOutputStream());
+   		 	
+   		 	
+   		 	while(!msg.equals("exit")){
+   		 		msg = din.readUTF();
+   		 		updateArea.setText(msg);
+   		 		System.out.println(msg);
+   		 	}
+        }
+        catch(Exception e){
+   		
+        }*/
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new CashierInterface().setVisible(true);
@@ -261,6 +293,10 @@ public class CashierInterface extends javax.swing.JFrame {
         });
     }
     
+    public void RetryStart(int port){
+        if(ss != null){ ss.stop(); }
+        ss = new ServerClass(this, port);
+    }
    
 }
 

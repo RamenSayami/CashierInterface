@@ -21,6 +21,10 @@ package cashier.model;
  * Take care of session Id later.
  */
 public class Order {
+	
+	public enum OrderStatus {
+	    ORDER_IN, CANCELLED,UNCOOKED, COOKING, COOKED, DELIVERED, ONBILL, PAID
+	}
     
     //private String SessionId;
     private Integer TableNo;
